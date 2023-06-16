@@ -13,45 +13,176 @@
 </head>
 
 <body>
-    <div class="container">
+    <div class="container sign-in" style="display: none;">
 
         <h1>Login</h1>
-        
+
         <form action="#" class="form-contain">
 
             <div class="input-contain">
-                <input type="email" placeholder="Enter E-mail" required>
+                <input type="email" id="email1" placeholder="Enter E-mail" required>
                 <div class="underline"></div>
             </div>
 
             <div class="input-contain">
-                <input type="password" placeholder="Password" required>
+                <input type="password" id="password1" placeholder="Password" required>
                 <div class="underline"></div>
             </div>
 
             <div class="input-contain">
-                <input type="submit" value="Login">
-            </div>
-
-            <div class="text-contain">
-                Connect with Social Media Accounts
-            </div>
-
-            <div class="github">
-                <a href="#"><i class="fa-brands fa-github fa-2x"></i>
-                    Connect with Github</a>
-            </div>
-            <div class="facebook">
-                <a href="#"><i class="fa-brands fa-facebook fa-2x"></i>
-                    Connect with Facebook</a>
-            </div>
-            <div class="twitter">
-                <a href="#"><i class="fa-brands fa-twitter fa-2x"></i>
-                    Connect with Twitter</a>
+                <input type="submit" value="Login" id="signInBtn">
             </div>
 
         </form>
     </div>
+
+    <div class="container sign-up" style="display:block;">
+
+        <h1>Sign Up</h1>
+
+        <form action="#" class="form-contain">
+
+            <div class="input-contain">
+                <input type="text" id="username" placeholder="Enter Username" minlength="3" required>
+                <div class="underline"></div>
+            </div>
+
+            <div class="input-contain">
+                <input type="email" id="email" placeholder="Enter E-mail" minlength="5" required>
+                <div class="underline"></div>
+            </div>
+
+            <div class="input-contain">
+                <input type="password" id="password" placeholder="Password" minlength="6" maxlength="24" required>
+                <div class="underline"></div>
+            </div>
+
+            <div class="input-contain">
+                <input type="submit" id="signUpBtn" value="Sign Up">
+            </div>
+
+            <div class="input-contain">
+                <input type="submit" value="Login" id="signInButton">
+            </div>
+
+        </form>
+    </div>
+
+    <div class="login-success" id="signOutArea" style="display: none;">
+        <div class="top-div">
+            <h2>Login Process Successful</h2>
+        </div>
+        <div class="input-contain signout-inp">
+            <input type="submit" id="signOutBtn" value="Sign Out">
+        </div>
+    </div>
+
+    <script type="module">
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js";
+        import { getDatabase, get, push, set, ref, update, remove, child } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-database.js"
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-auth.js"
+
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCtk2MN4Njxpwp8RjiKnPI3BPB4CLGLenY",
+            authDomain: "loginform-e83d8.firebaseapp.com",
+            projectId: "loginform-e83d8",
+            storageBucket: "loginform-e83d8.appspot.com",
+            messagingSenderId: "465627858541",
+            appId: "1:465627858541:web:7c52431dcb4de8d9fee164"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase()
+        const auth = getAuth()
+
+        const signInArea = document.querySelector(".sign-in");
+        const signUpArea = document.querySelector(".sign-up");
+        const signOutArea = document.querySelector("#signOutArea");
+        const userName = document.querySelector("#username");
+        const email = document.querySelector("#email");
+        const password = document.querySelector("#password");
+        const loginEmail = document.querySelector("#email1");
+        const loginPass = document.querySelector("#password1");
+        const signUpBtn = document.querySelector("#signUpBtn");
+        const signInBtn = document.querySelector("#signInBtn");
+        const loginSuccess = document.querySelector(".login-success");
+        const signOutBtn = document.querySelector("#signOutBtn");
+        const signInButton = document.querySelector("#signInButton");
+
+
+        function signUp() {
+
+            const userName = username.value.trim();
+            const userEmail = email.value.trim();
+            const userPass = password.value.trim();
+            const postRef = ref(db, "username/");
+
+            createUserWithEmailAndPassword(auth, userEmail, userPass, userName)
+                .then((userCredential) => {
+                    console.log(userCredential);
+                    const user = userCredential.user;
+                    push(postRef, {
+                        username: userName
+                    });
+                    alert("Registration Success");
+                    signUpArea.style.display = "none";
+                    signInArea.style.display = "block";
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    alert(errorMessage);
+                })
+        }
+
+        function signIn() {
+            const loginEmailValue = loginEmail.value.trim();
+            const loginPassValue = loginPass.value.trim();
+
+            signInWithEmailAndPassword(auth, loginEmailValue, loginPassValue)
+                .then((userCredential) => {
+                    console.log(userCredential);
+                    const user = userCredential.user;
+                    alert("Success");
+                    signInArea.style.display = "none"
+                    loginSuccess.style.display = "flex"
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    alert(errorMessage);
+                })
+        }
+
+        function logOut() {
+            signOut(auth)
+                .then(() => {
+                    alert("Sign Out Success");
+                    signOutArea.style.display = "none";
+                    signUpArea.style.display = "block"
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = errorCode.message;
+                    alert(errorMessage)
+                })
+        }
+
+        function showLogin() {
+            signUpArea.style.display = "none"
+            signInArea.style.display = "block"
+        }
+
+
+        signUpBtn.addEventListener("click", signUp);
+        signInBtn.addEventListener("click", signIn);
+        signOutBtn.addEventListener("click", logOut);
+        signInButton.addEventListener("click", showLogin)
+
+
+    </script>
 </body>
 
 </html>
